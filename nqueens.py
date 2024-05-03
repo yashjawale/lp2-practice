@@ -31,7 +31,7 @@ def solveNQueens(n):
 
   return res
 
-result = solveNQueens(10)
+result = solveNQueens(4)
 
 for i in result:
   for j in i:
