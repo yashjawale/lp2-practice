@@ -2,7 +2,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 public class MD5Hash {
-    
+
     // Function to calculate the MD5 hash of a string
     public static String calculateMD5(String input) {
         try {
@@ -31,11 +31,11 @@ public class MD5Hash {
     // Main method
     public static void main(String[] args) {
         // Example string
-        String input = "Hello, MD6!";
-        
+        String input = "Hello, MD5!";
+
         // Calculate the MD5 hash of the input string
         String md5Hash = calculateMD5(input);
-        
+
         System.out.println("MD5 Hash: " + md5Hash);
     }
 }

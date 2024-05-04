@@ -1,85 +1,59 @@
-import random
-import math
-
-# Function to check if a number is prime
-def is_prime(n):
-    if n <= 1:
+def is_prime(num):
+    if num < 2:
         return False
-    elif n <= 3:
-        return True
-    elif n % 2 == 0 or n % 3 == 0:
-        return False
-    i = 5
-    while i * i <= n:
-        if n % i == 0 or n % (i + 2) == 0:
+    for i in range(2, int(num**0.5) + 1):
+        if num % i == 0:
             return False
-        i += 6
     return True
 
-# Function to generate a random prime number of n bits
-def generate_prime(bits):
+def get_prime_input():
     while True:
-        num = random.getrandbits(bits)
-        num |= (1 << bits - 1) | 1
-        if is_prime(num):
-            return num
+        try:
+            num = int(input("Enter a prime number: "))
+            if is_prime(num):
+                return num
+            else:
+                print(f"{num} is not a prime number. Please try again.")
+        except ValueError:
+            print("Invalid input. Please enter a valid integer.")
 
-# Function to calculate the greatest common divisor (GCD)
-def gcd(a, b):
-    while b != 0:
-        a, b = b, a % b
-    return a
+def generate_keypair(p, q):
+    if not (is_prime(p) and is_prime(q)):
+        raise ValueError("Both input numbers must be prime.")
 
-# Function to generate public and private keys
-def generate_keys(bits):
-    # Generate two random prime numbers
-    p = generate_prime(bits // 2)
-    q = generate_prime(bits // 2)
-
-    # Compute n (modulus)
     n = p * q
+    phi = (p - 1) * (q - 1)
 
-    # Compute phi(n)
-    phi_n = (p - 1) * (q - 1)
+    e = 65537  # Common choice for public exponent (could be dynamic)
+    d = pow(e, -1, phi)
 
-    # Choose e such that 1 < e < phi(n) and e is coprime with phi(n)
-    e = random.randint(2, phi_n - 1)
-    while gcd(e, phi_n) != 1:
-        e = random.randint(2, phi_n - 1)
+    public_key = (n, e)
+    private_key = (n, d)
 
-    # Compute d, the modular multiplicative inverse of e (mod phi(n))
-    d = pow(e, -1, phi_n)
+    return public_key, private_key
 
-    # Return public and private keys
-    return (e, n), (d, n)
-
-# Function to encrypt a message using the public key
 def encrypt(message, public_key):
-    e, n = public_key
-    encrypted_message = [pow(ord(char), e, n) for char in message]
-    return encrypted_message
+    n, e = public_key
+    ciphertext = [pow(char, e, n) for char in message.encode()]
+    return ciphertext
+def decrypt(ciphertext, private_key):
+    n, d = private_key
+    decrypted_message = ''.join([chr(pow(char, d, n)) for char in ciphertext])
+    return decrypted_message.encode().decode()
 
-# Function to decrypt a message using the private key
-def decrypt(encrypted_message, private_key):
-    d, n = private_key
-    decrypted_message = [chr(pow(char, d, n)) for char in encrypted_message]
-    return ''.join(decrypted_message)
+# Example usage with user-input primes
+p = get_prime_input()
+q = get_prime_input()
 
-# Main function
-def main():
-    # Generate public and private keys
-    public_key, private_key = generate_keys(bits=16)
+public_key, private_key = generate_keypair(p, q)
 
-    # Message to be encrypted
-    message = "Hello, RSA!"
+message = input("Enter a message: ")
+print(f"Original message: {message}")
 
-    # Encrypt the message using the public key
-    encrypted_message = encrypt(message, public_key)
-    print("Encrypted Message:", encrypted_message)
+encrypted_message = encrypt(message, public_key)
+print(f"Encrypted message: {encrypted_message}")
+print(f"Public Key: {public_key}")
+print(f"Private Key: {private_key}")
 
-    # Decrypt the message using the private key
-    decrypted_message = decrypt(encrypted_message, private_key)
-    print("Decrypted Message:", decrypted_message)
-
-if __name__ == "__main__":
-    main()
+decrypted_message = decrypt(encrypted_message, private_key)
+print(f"Decrypted message: {decrypted_message}")
